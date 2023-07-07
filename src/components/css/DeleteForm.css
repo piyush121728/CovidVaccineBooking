@@ -1,0 +1,57 @@
+.containerx {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-groupx {
+    margin-bottom: 20px;
+}
+
+.form-groupx label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.dropdownx {
+    display: flex;
+    align-items: center;
+}
+
+.dropdownx select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.options-listx {
+    margin-top: 20px;
+}
+
+.option-itemx {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.remove-buttonx {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #ff0000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+    .containerx {
+        padding: 10px;
+    }
+}
