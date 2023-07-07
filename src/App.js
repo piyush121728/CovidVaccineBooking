@@ -3,21 +3,21 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
 import Home from './components/Home';
 import AdminHome from './components/AdminHome';
+// import Cookies from "universal-cookie";
 
 function App() {
-    const [profile, setProfile] = useState(null);
+    const [user, setUser] = useState(null);
+    // const cookies = new Cookies();
+    
+    // if (user?.access_token)
+        // cookies.set('google_access_token')
+    console.log("user => ", user)
 
     return (
         <Router>
             <Routes>
-                <Route path="/login" element={<Login profile={profile} setProfile={setProfile} />} />
-                <Route path="/" element={
-                    profile && profile.userType === 'admin' ? 
-                    <AdminHome profile={profile} />
-                    :
-                    <Home profile={profile} />
-                }
-                />
+                <Route path="/login" element={<Login user={user} setUser={setUser} />} />
+                <Route path="/" element={<Home user={user} setUser={setUser} />}/>
             </Routes>
         </Router>
     );

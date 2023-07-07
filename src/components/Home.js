@@ -1,12 +1,72 @@
-import React, { useState } from 'react';
-import useValidate from '../hooks/useValidate';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+// import useProfile from '../hooks/useProfile';
+// import useValidate from '../hooks/useValidate';
 import Navbar from './Navbar';
 import axios from 'axios';
 import Url from '../Url';
 import Table from './utils/Table';
+import AdminHome from './AdminHome';
 
-const Home = ({ profile }) => {
-    useValidate(profile);
+const Home = ({ user, setUser }) => {
+
+    // const profile = useProfile(user);
+    const navigate = useNavigate();
+    const [profile, setProfile] = useState(null);
+
+    console.log("home===>", user)
+    
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        if (user) {
+            console.log(user);
+            let userProfile;
+            axios
+                .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
+                    headers: {
+                        Authorization: `Bearer ${user.access_token}`,
+                        Accept: 'application/json'
+                    }
+                })
+                .then((res) => {
+                    userProfile = res.data;
+                    console.log("profile data from google", res.data)
+                    // setProfile(userProfile);
+
+                    if (user.userType === 'Admin') {
+                        axios.post(Url.verifyAdmin, { email: userProfile.email })
+                            .then(res => {
+                                console.log("verified as admin", userProfile)
+                                userProfile = { ...userProfile, userType: 'Admin' }
+                                setProfile(userProfile);
+                                return;
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                navigate('/login');
+                            });
+                    }
+                    else {
+                        console.log('not a admin', userProfile)
+                        setProfile(userProfile);
+                        return;
+                    }
+
+                })
+                .catch((err) => {
+                    console.log(err)
+                    navigate('/login');
+                });
+        }
+    }, []);
+
+    console.log("home", profile)
+    // useValidate(profile);
+
     const [pincode, setPincode] = useState();
     const [err, setError] = useState();
     const [covidCentres, setCovidCentres] = useState();
@@ -35,9 +95,14 @@ const Home = ({ profile }) => {
         }
     }
 
+    console.log("home ===> ", profile)
+    if (profile && profile?.userType === 'Admin') {
+        return (<AdminHome user={user} setUser={setUser} />)
+    }
+
     return (
         <>
-            <Navbar profile={profile} />
+            <Navbar profile={profile} setUser={setUser} />
             {
                 err &&
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
@@ -48,12 +113,12 @@ const Home = ({ profile }) => {
                 </div>
             }
 
-            <div 
-                // style={{
-                //     backgroundImage: 'url("./images/userbg.jpeg")',
-                //     height: "90vh",
-                //     width: "90vw"
-                // }}
+            <div
+            // style={{
+            //     backgroundImage: 'url("./images/userbg.jpeg")',
+            //     height: "90vh",
+            //     width: "90vw"
+            // }}
             >
                 <div className='container d-flex justify-content-center align-items-center flex-column mt-5'>
 

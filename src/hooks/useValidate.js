@@ -5,7 +5,8 @@ const useValidate = (profile) => {
     const navigate = useNavigate();
     
     useEffect(() => {
-        if (profile === null)
+        console.log("useValidate", profile)
+        if (!profile || profile === null || profile === undefined || profile[0] === null)
             navigate('/login');
     }, [profile]);
 

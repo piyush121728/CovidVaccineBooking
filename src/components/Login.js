@@ -1,31 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { googleLogout, useGoogleLogin } from '@react-oauth/google';
+import React, { useState } from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
-import useProfile from '../hooks/useProfile';
-// import axios from 'axios';
 
-function Login({ profile, setProfile }) {
-    const [user, setUser] = useState([]);
-    const [userType, setUserType] = useState("Select");
+function Login({ user, setUser }) {
+    const navigate = useNavigate();
     const [err, setError] = useState();
 
-    const navigate = useNavigate();
-    if (profile) {
+    if (user?.access_token)
         navigate('/');
-    }
 
     const login = useGoogleLogin({
-        onSuccess: (codeResponse) => setUser(codeResponse),
+        onSuccess: (codeResponse) => {
+            let updateUserDetails = { ...user, ...codeResponse };
+            console.log("googleLoginSuccess", updateUserDetails);
+            setUser(updateUserDetails)
+        },
         onError: (error) => setError(error)
     });
 
-    useProfile(user, setProfile, userType);
+    const handleClick = (e) => {
+        let userType = e.target.textContent;
+        let updateUserDetails = {...user, userType };
+        setUser(updateUserDetails);
+    }
     
-    const logOut = () => {
-        googleLogout();
-        setProfile(null);
-    };
-
     return (
         <div className='d-flex justify-content-center align-items-center'
             style={{ height: "100vh", width: "100vw", backgroundColor: "#017e7e" }} >
@@ -49,23 +47,21 @@ function Login({ profile, setProfile }) {
                         <button className="px-5 btn dropdown-toggle"
                             style={{ backgroundColor: "#017e7e", color: "white" }}
                             type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {userType}
+                            {user?.userType || "Select"}
                         </button>
                         <ul className="dropdown-menu">
                             <li className='dropdown-item'
-                                onClick={(e) => setUserType(e.target.textContent)}>
-                                    <span className="fas fa-user"></span> User
-                            </li>
+                                onClick={handleClick}>
+                                    <span className="fas fa-user"></span>User</li>
                             <li className='dropdown-item'
-                                onClick={(e) => setUserType(e.target.textContent)}>
-                                <span className="fas fa-user-shield"></span> Admin                   
-                            </li>
+                                onClick={handleClick}>
+                                <span className="fas fa-user-shield"></span>Admin</li>
                         </ul>
                     </div>
                 </div>
 
                 {
-                    userType !== "Select" &&
+                    user?.userType &&
                     <div className='d-flex justify-content-center mt-3'>
                         <button type="button" className="btn px-5"
                             onClick={() => login()}

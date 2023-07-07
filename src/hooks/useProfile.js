@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Url from '../Url';
 
-const useProfile = (user, setProfile, userType) => {
+const useProfile = (user) => {
+    const [profile, setProfile] = useState(null);
+
     useEffect(() => {
         if (user) {
             let userProfile;
@@ -15,24 +17,32 @@ const useProfile = (user, setProfile, userType) => {
                 })
                 .then((res) => {
                     userProfile = res.data;
-                    console.log(res.data)
-                    setProfile(userProfile);
+                    console.log("profile data from google", res.data)
+                    // setProfile(userProfile);
+
+                    if (user.userType === 'Admin') {
+                        axios.post(Url.verifyAdmin, { email: userProfile.email })
+                        .then(res => {
+                            console.log("verified as admin", userProfile)
+                            userProfile = {...userProfile, userType: 'admin'}
+                            setProfile(userProfile);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                    else {
+                        console.log('not a admin', userProfile)
+                        setProfile(userProfile);
+                    }
+
                 })
                 .catch((err) => console.log(err));
             
-            console.log(userProfile)
-            // if (userType === 'Admin') {
-            //     axios.post(Url.verifyAdmin, { email: userProfile.email })
-            //     .then(res => {
-            //         userProfile = {...userProfile, userType: 'admin'}
-            //         setProfile(userProfile);
-            //     })
-            //     .catch((err) => console.log(err));
-            // }
+            // console.log(userProfile)
         }
     }, [user]);
 
-    return;
+    console.log('reached return')
+    return [profile];
 };
 
 export default useProfile;

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
-import useValidate from '../hooks/useValidate';
+import { useNavigate } from 'react-router-dom';
+
+// import useProfile from '../hooks/useProfile';
+// import useValidate from '../hooks/useValidate';
 import './css/adminHome.css'
 import axios from 'axios';
 import Url from '../Url';
@@ -8,27 +11,77 @@ import CenterForm from './utils/CenterForm';
 import DeleteFrom from './utils/DeleteForm';
 import AllCentres from './utils/AllCentres';
 
-const AdminHome = ({ profile }) => {
 
-    useValidate(profile);
+const AdminHome = ({ user, setUser }) => {
+
+    // const profile = useProfile(user);
+    const navigate = useNavigate();
+
+    const [profile, setProfile] = useState(null);
     const [centerList, setCenterList] = useState();
 
     useEffect(() => {
-        const fetchAllCentres = async () => {
-            try {
-                const response = await axios.get(Url.fetchAllCentres);
-                console.log(response.data)
-                setCenterList(response.data);
-            } catch (err) {
-                console.log("Couldn't fetch centres list");
-            }
+        if (!user) {
+            navigate('/login');
+            return;
         }
-        fetchAllCentres();
-    }, [])
+
+        if (user) {
+            let userProfile;
+            axios
+                .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
+                    headers: {
+                        Authorization: `Bearer ${user.access_token}`,
+                        Accept: 'application/json'
+                    }
+                })
+                .then((res) => {
+                    userProfile = res.data;
+                    console.log("profile data from google", res.data)
+                    // setProfile(userProfile);
+
+                    if (user.userType === 'Admin') {
+                        axios.post(Url.verifyAdmin, { email: userProfile.email })
+                            .then(res => {
+                                console.log("verified as admin", userProfile)
+                                userProfile = { ...userProfile, userType: 'Admin' }
+                                setProfile(userProfile);
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                navigate('/login');
+                            });
+                    }
+                    else {
+                        console.log('not a admin', userProfile)
+                        setProfile(userProfile);
+                    }
+
+                })
+                .catch((err) => {
+                    console.log(err);
+                    navigate('/login');
+                });
+
+            // console.log(userProfile)
+            const fetchAllCentres = async () => {
+                try {
+                    const response = await axios.get(Url.fetchAllCentres);
+                    console.log(response.data)
+                    setCenterList(response.data);
+                } catch (err) {
+                    console.log("Couldn't fetch centres list");
+                }
+            }
+            fetchAllCentres();
+        }
+    }, []);
+
+    // useValidate(profile);
 
     return (
         <>
-            <Navbar profile={profile} />
+            <Navbar profile={profile} setUser={setUser}/>
             <div className="container">
                 <div className="section">
                     <div className="text">

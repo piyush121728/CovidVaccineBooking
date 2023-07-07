@@ -1,6 +1,16 @@
 import React from 'react';
+import { googleLogout } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom';
 
-const Navbar = ({profile}) => {
+const Navbar = ({ profile, setUser }) => {
+    const navigate = useNavigate();
+
+    const logout = () => {
+        googleLogout();
+        setUser(null);
+        navigate('/login');
+    };
+
     return (
         <nav className="navbar navbar-expand-lg" style={{backgroundColor: '#017e7e'}}>
             <div className="container-fluid">
@@ -29,7 +39,12 @@ const Navbar = ({profile}) => {
                 </div>
 
                 <div className="d-flex align-items-center">
-
+                    <button type="button" className="btn px-5"
+                        onClick={() => logout()}
+                        style={{ backgroundColor: "#edffff" }}
+                    >
+                        Logout
+                    </button>
                     <img
                         src={profile && profile.image}
                         className="rounded-circle"
